@@ -15,6 +15,12 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
+## Instalar dependencias
+
+```bash
+docker compose exec app composer install
+```
+
 ## Generar APP_KEY
 
 ```bash
@@ -27,6 +33,17 @@ Así debe de quedar:
 
 ```bash
 DB_PASSWORD=Password123!
+```
+
+## Crear la base de datos
+
+```bash
+docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'Password123!' -C
+```
+
+```sql
+CREATE DATABASE pagalope;
+GO
 ```
 
 ## Migraciones
