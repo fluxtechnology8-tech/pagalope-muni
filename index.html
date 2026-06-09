@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MDEContribuyente — Municipalidad Distrital de La Esperanza</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            mde: {
+              navy:   '#0B2447',
+              blue:   '#19376D',
+              mid:    '#146C94',
+              sky:    '#1E90CF',
+              gold:   '#C9A84C',
+              golddark:'#A8853A',
+              goldlt: '#F0D080',
+              cream:  '#FDF6E3',
+              light:  '#EEF4FB',
+            }
+          },
+          fontFamily: {
+            heading: ['Montserrat', 'sans-serif'],
+            serif:   ['Crimson Pro', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Montserrat', sans-serif; }
+
+    /* Patrón sutil en el header */
+    .header-bg {
+      background: linear-gradient(135deg, #0B2447 0%, #19376D 50%, #146C94 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .header-bg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 20% 50%, rgba(201,168,76,0.12) 0%, transparent 60%),
+        radial-gradient(circle at 80% 20%, rgba(30,144,207,0.15) 0%, transparent 50%);
+    }
+    .header-bg::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #C9A84C, #F0D080, #C9A84C);
+    }
+
+    /* Escudo placeholder */
+    .escudo {
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, #C9A84C, #F0D080);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.35), 0 4px 20px rgba(0,0,0,0.3);
+      flex-shrink: 0;
+    }
+
+    /* Card principal con sombra */
+    .search-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(11,36,71,0.18), 0 4px 16px rgba(11,36,71,0.1);
+      border: 1px solid rgba(201,168,76,0.2);
+    }
+
+    /* Input dorado */
+    .input-gold:focus {
+      outline: none;
+      border-color: #C9A84C;
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.2);
+    }
+
+    /* Botón principal */
+    .btn-primary {
+      background: linear-gradient(135deg, #0B2447, #19376D);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #19376D, #146C94);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .btn-primary:hover::after { opacity: 1; }
+    .btn-primary span { position: relative; z-index: 1; }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #C9A84C, #A8853A);
+      transition: all 0.3s ease;
+    }
+    .btn-gold:hover {
+      background: linear-gradient(135deg, #A8853A, #8B6B2A);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(201,168,76,0.4);
+    }
+
+    /* Stats card */
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #E8F0F7;
+      transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 36px rgba(11,36,71,0.12);
+      border-color: rgba(201,168,76,0.3);
+    }
+
+    /* Badge deuda */
+    .badge-vencida { background: #FEE2E2; color: #B91C1C; }
+    .badge-vigente  { background: #DCFCE7; color: #166534; }
+    .badge-fraccion { background: #FEF3C7; color: #92400E; }
+
+    /* Tabla resultado */
+    .result-row {
+      transition: background 0.2s;
+    }
+    .result-row:hover { background: #EEF4FB; }
+
+    /* Separador dorado */
+    .gold-line {
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #C9A84C, transparent);
+      border: none;
+    }
+
+    /* Nav links */
+    .nav-link {
+      position: relative;
+      transition: color 0.2s;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px; left: 0; right: 0;
+      height: 2px;
+      background: #C9A84C;
+      transform: scaleX(0);
+      transition: transform 0.25s;
+    }
+    .nav-link:hover::after { transform: scaleX(1); }
+
+    /* Sidebar admin */
+    .sidebar-item {
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .sidebar-item:hover, .sidebar-item.active {
+      background: rgba(201,168,76,0.1);
+      border-left-color: #C9A84C;
+      color: #C9A84C;
+    }
+
+    /* Animación entrada */
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(20px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.5s ease forwards; }
+    .delay-1 { animation-delay: 0.1s; opacity: 0; }
+    .delay-2 { animation-delay: 0.2s; opacity: 0; }
+    .delay-3 { animation-delay: 0.3s; opacity: 0; }
+    .delay-4 { animation-delay: 0.4s; opacity: 0; }
+
+    /* Scroll behavior */
+    html { scroll-behavior: smooth; }
+
+    /* Pulse badge */
+    @keyframes pulse-gold {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76, 0.4); }
+      50%       { box-shadow: 0 0 0 8px rgba(201,168,76, 0); }
+    }
+    .pulse-gold { animation: pulse-gold 2s infinite; }
+  </style>
+</head>
+<body class="bg-mde-light min-h-screen" x-data="appData()" x-init="init()">
+
+<!-- ═══════════════════════════════════════════════
+     TOPBAR INSTITUCIONAL
+═══════════════════════════════════════════════ -->
+<div class="bg-mde-navy text-white text-xs py-2 px-4 flex justify-between items-center">
+  <div class="flex items-center gap-4">
+    <span class="flex items-center gap-1.5 opacity-75">
+      <i class="fa-solid fa-clock text-mde-goldlt"></i>
+      Lun–Vie: 8:00am – 4:30pm
+    </span>
+    <span class="hidden sm:flex items-center gap-1.5 opacity-75">
+      <i class="fa-solid fa-phone text-mde-goldlt"></i>
+      (044) 461-000
+    </span>
+  </div>
+  <div class="flex items-center gap-4">
+    <span class="opacity-60">Municipalidad Distrital de La Esperanza</span>
+    <a href="#" @click.prevent="showAdminLogin()" class="flex items-center gap-1.5 bg-mde-gold/20 hover:bg-mde-gold/40 px-3 py-1 rounded-full transition-all text-mde-goldlt font-medium">
+      <i class="fa-solid fa-shield-halved"></i>
+      Acceso Admin
+    </a>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     HEADER PRINCIPAL
+═══════════════════════════════════════════════ -->
+<header class="header-bg text-white relative">
+  <div class="max-w-7xl mx-auto px-4 py-8 relative z-10">
+    <div class="flex items-center justify-between gap-6 flex-wrap">
+
+      <!-- Logo + Nombre -->
+      <div class="flex items-center gap-4 fade-up">
+        <div class="escudo">
+          <img src="{{ url_for('static', filename='images/muni2.png') }}" alt="logo">
+        </div>
+        <div>
+          <p class="text-mde-goldlt text-xs font-semibold tracking-widest uppercase mb-0.5">
+            Municipalidad Distrital de La Esperanza
+          </p>
+          <h1 class="font-heading font-black text-3xl tracking-tight leading-none">
+            MDE<span class="text-mde-gold">Contribuyente</span>
+          </h1>
+          <p class="text-blue-200 text-xs mt-1 font-medium">
+            Sistema de Consulta y Pago de Deudas Tributarias
+          </p>
+        </div>
+      </div>
+
+      <!-- Nav -->
+      <nav class="hidden md:flex items-center gap-6 fade-up delay-1">
+        <a href="#" @click.prevent="view='portal'" class="nav-link text-sm font-medium text-white/90 hover:text-white py-1">
+          <i class="fa-solid fa-magnifying-glass mr-1.5 text-mde-goldlt"></i>
+          Consultar deuda
+        </a>
+        <a href="#" @click.prevent="view='pago'" class="nav-link text-sm font-medium text-white/90 hover:text-white py-1">
+          <i class="fa-solid fa-credit-card mr-1.5 text-mde-goldlt"></i>
+          Pagar en línea
+        </a>
+        <a href="#" class="nav-link text-sm font-medium text-white/90 hover:text-white py-1">
+          <i class="fa-solid fa-file-invoice mr-1.5 text-mde-goldlt"></i>
+          Fraccionamiento
+        </a>
+        <a href="#" class="nav-link text-sm font-medium text-white/90 hover:text-white py-1">
+          <i class="fa-solid fa-circle-question mr-1.5 text-mde-goldlt"></i>
+          Ayuda
+        </a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+
+<!-- ═══════════════════════════════════════════════
+     VISTA: PORTAL PÚBLICO
+═══════════════════════════════════════════════ -->
+<div x-show="view === 'portal'" x-transition>
+
+  <!-- Hero con buscador -->
+  <section class="bg-gradient-to-b from-mde-blue/5 to-transparent pt-12 pb-16 px-4">
+    <div class="max-w-3xl mx-auto text-center fade-up delay-2">
+      <div class="inline-flex items-center gap-2 bg-mde-gold/10 text-mde-golddark text-xs font-semibold px-4 py-2 rounded-full border border-mde-gold/30 mb-6">
+        <i class="fa-solid fa-circle-check text-mde-gold pulse-gold"></i>
+        Servicio disponible 24 horas
+      </div>
+      <h2 class="font-heading font-black text-4xl text-mde-navy mb-4 leading-tight">
+        Consulta tu deuda tributaria<br/>
+        <span class="text-mde-mid">desde cualquier lugar</span>
+      </h2>
+      <p class="text-gray-500 text-base mb-10 max-w-xl mx-auto font-medium">
+        Ingresa tu número de DNI o RUC para ver tu estado de cuenta, deudas pendientes y realizar pagos en línea.
+      </p>
+
+      <!-- Tarjeta de búsqueda -->
+      <div class="search-card p-8 fade-up delay-3">
+        <!-- Tabs tipo -->
+        <div class="flex bg-mde-light rounded-xl p-1 mb-6 gap-1">
+          <button @click="searchType='dni'"
+            :class="searchType==='dni' ? 'bg-mde-navy text-white shadow' : 'text-gray-500 hover:text-mde-navy'"
+            class="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all">
+            <i class="fa-solid fa-id-card mr-2"></i>Persona Natural (DNI)
+          </button>
+          <button @click="searchType='ruc'"
+            :class="searchType==='ruc' ? 'bg-mde-navy text-white shadow' : 'text-gray-500 hover:text-mde-navy'"
+            class="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all">
+            <i class="fa-solid fa-building mr-2"></i>Persona Jurídica (RUC)
+          </button>
+        </div>
+
+        <!-- Input búsqueda -->
+        <div class="flex gap-3">
+          <div class="flex-1 relative">
+            <div class="absolute left-4 top-1/2 -translate-y-1/2 text-mde-mid pointer-events-none">
+              <i x-show="searchType==='dni'" class="fa-solid fa-id-card text-lg"></i>
+              <i x-show="searchType==='ruc'" class="fa-solid fa-building text-lg"></i>
+            </div>
+            <input
+              x-model="searchDoc"
+              type="text"
+              :placeholder="searchType==='dni' ? 'Ingresa tu DNI (8 dígitos)' : 'Ingresa tu RUC (11 dígitos)'"
+              :maxlength="searchType==='dni' ? 8 : 11"
+              class="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-mde-navy font-semibold text-lg input-gold transition-all"
+              @keyup.enter="buscarContribuyente()"
+            />
+          </div>
+          <button @click="buscarContribuyente()"
+            class="btn-primary text-white px-8 py-4 rounded-xl font-bold text-sm flex items-center gap-2">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>Consultar</span>
+          </button>
+        </div>
+
+        <!-- Alerta si hay resultado -->
+        <div x-show="showResult" x-transition class="mt-6">
+          <hr class="gold-line mb-6"/>
+
+          <!-- Info contribuyente -->
+          <div class="flex items-start justify-between mb-5 flex-wrap gap-3">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-mde-light flex items-center justify-center">
+                <i class="fa-solid fa-user-tie text-mde-mid text-xl"></i>
+              </div>
+              <div class="text-left">
+                <p class="font-bold text-mde-navy text-base" x-text="contributorData?.nombre || '-'"></p>
+                <p class="text-gray-400 text-xs font-medium mt-0.5">
+                  <i class="fa-solid fa-id-card mr-1 text-mde-gold"></i><span x-text="(contributorData?.doc || '-')"></span>
+                  <span class="mx-2 text-gray-300">|</span>
+                  <i class="fa-solid fa-location-dot mr-1 text-mde-gold"></i><span x-text="(contributorData?.direccion || '-')"></span>
+                </p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-xs text-gray-400 font-medium">Deuda total</p>
+              <p class="text-2xl font-black text-red-600" x-text="'S/ ' + (contributorData?.total || 0).toFixed(2)"></p>
+            </div>
+          </div>
+
+          <!-- Tabs deudas: Pendientes / Pagadas -->
+          <div class="flex bg-mde-light rounded-xl p-1 mb-4 gap-1">
+            <button @click="deudaTab='pendientes'"
+              :class="deudaTab==='pendientes' ? 'bg-red-600 text-white shadow' : 'text-gray-500 hover:text-red-600'"
+              class="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all">
+              <i class="fa-solid fa-clock-rotate-left mr-2"></i>Pendientes
+              <span class="ml-1 text-xs" x-text="'(' + deudasPendientes.length + ')'"></span>
+            </button>
+            <button @click="deudaTab='pagadas'"
+              :class="deudaTab==='pagadas' ? 'bg-green-600 text-white shadow' : 'text-gray-500 hover:text-green-600'"
+              class="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all">
+              <i class="fa-solid fa-circle-check mr-2"></i>Pagadas
+              <span class="ml-1 text-xs" x-text="'(' + deudasPagadas.length + ')'"></span>
+            </button>
+          </div>
+
+          <!-- TABLA PENDIENTES -->
+          <div x-show="deudaTab==='pendientes'">
+            <template x-if="deudasPendientes.length === 0">
+              <p class="text-center text-gray-400 text-sm py-8">No tiene deudas pendientes</p>
+            </template>
+            <template x-if="deudasPendientes.length > 0">
+              <div>
+                <div class="overflow-x-auto rounded-xl border border-gray-100">
+                  <table class="w-full text-sm">
+                    <thead>
+                      <tr class="bg-red-600 text-white">
+                        <th class="px-4 py-3 text-left font-semibold text-xs">#</th>
+                        <th class="px-4 py-3 text-left font-semibold text-xs">Concepto</th>
+                        <th class="px-4 py-3 text-center font-semibold text-xs">Periodo</th>
+                        <th class="px-4 py-3 text-right font-semibold text-xs">Monto</th>
+                        <th class="px-4 py-3 text-center font-semibold text-xs">Estado</th>
+                        <th class="px-4 py-3 text-center font-semibold text-xs">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="(deuda, idx) in paginatedPendientes" :key="deuda.id">
+                        <tr class="result-row border-b border-gray-50">
+                          <td class="px-4 py-3 text-gray-400 text-xs font-medium" x-text="(pagePendientes - 1) * perPage + idx + 1"></td>
+                          <td class="px-4 py-3">
+                            <div class="flex items-center gap-2">
+                              <div class="w-7 h-7 rounded-lg bg-red-50 flex items-center justify-center">
+                                <i :class="deuda.icon" class="text-red-500 text-xs"></i>
+                              </div>
+                              <span class="font-medium text-mde-navy" x-text="deuda.concepto"></span>
+                            </div>
+                          </td>
+                          <td class="px-4 py-3 text-center text-gray-500 font-medium" x-text="deuda.periodo"></td>
+                          <td class="px-4 py-3 text-right font-bold text-red-600" x-text="deuda.monto"></td>
+                          <td class="px-4 py-3 text-center">
+                            <span class="badge-vencida px-2.5 py-1 rounded-full text-xs font-bold" x-text="deuda.estado"></span>
+                          </td>
+                          <td class="px-4 py-3 text-center">
+                            <button @click="pagarDeuda(deuda)"
+                              class="bg-mde-mid hover:bg-mde-navy text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-all">
+                              <i class="fa-solid fa-credit-card mr-1"></i>Pagar
+                            </button>
+                          </td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+                <!-- Paginación pendientes -->
+                <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-100" x-show="totalPagesPendientes > 1">
+                  <p class="text-xs text-gray-400">
+                    Mostrando <span x-text="(pagePendientes-1)*perPage+1"></span>–<span x-text="Math.min(pagePendientes*perPage, totalPagPendientes)"></span>
+                    de <span x-text="totalPagPendientes"></span>
+                  </p>
+                  <div class="flex gap-1">
+                    <button @click="goToPagePendientes(pagePendientes-1)" :disabled="pagePendientes===1"
+                      class="w-8 h-8 rounded-lg text-xs font-bold border border-gray-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-mde-light transition-all">
+                      <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <template x-for="pg in totalPagesPendientes" :key="'pp'+pg">
+                      <button @click="goToPagePendientes(pg)"
+                        :class="pg===pagePendientes ? 'bg-red-600 text-white border-red-600' : 'text-gray-500 hover:bg-mde-light'"
+                        class="w-8 h-8 rounded-lg text-xs font-bold border border-gray-200 transition-all" x-text="pg"></button>
+                    </template>
+                    <button @click="goToPagePendientes(pagePendientes+1)" :disabled="pagePendientes===totalPagesPendientes"
+                      class="w-8 h-8 rounded-lg text-xs font-bold border border-gray-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-mde-light transition-all">
+                      <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- TABLA PAGADAS -->
+          <div x-show="deudaTab==='pagadas'">
+            <template x-if="deudasPagadas.length === 0">
+              <p class="text-center text-gray-400 text-sm py-8">No tiene deudas pagadas</p>
+            </template>
+            <template x-if="deudasPagadas.length > 0">
+              <div>
+                <div class="overflow-x-auto rounded-xl border border-gray-100">
+                  <table class="w-full text-sm">
+                    <thead>
+                      <tr class="bg-green-600 text-white">
+                        <th class="px-4 py-3 text-left font-semibold text-xs">#</th>
+                        <th class="px-4 py-3 text-left font-semibold text-xs">Concepto</th>
+                        <th class="px-4 py-3 text-center font-semibold text-xs">Periodo</th>
+                        <th class="px-4 py-3 text-right font-semibold text-xs">Monto</th>
+                        <th class="px-4 py-3 text-center font-semibold text-xs">Estado</th>
+                        <th class="px-4 py-3 text-center font-semibold text-xs">Comprobante</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="(deuda, idx) in paginatedPagadas" :key="deuda.id">
+                        <tr class="result-row border-b border-gray-50">
+                          <td class="px-4 py-3 text-gray-400 text-xs font-medium" x-text="(pagePagadas - 1) * perPage + idx + 1"></td>
+                          <td class="px-4 py-3">
+                            <div class="flex items-center gap-2">
+                              <div class="w-7 h-7 rounded-lg bg-green-50 flex items-center justify-center">
+                                <i :class="deuda.icon" class="text-green-500 text-xs"></i>
+                              </div>
+                              <span class="font-medium text-mde-navy" x-text="deuda.concepto"></span>
+                            </div>
+                          </td>
+                          <td class="px-4 py-3 text-center text-gray-500 font-medium" x-text="deuda.periodo"></td>
+                          <td class="px-4 py-3 text-right font-bold text-green-600" x-text="deuda.monto"></td>
+                          <td class="px-4 py-3 text-center">
+                            <span class="badge-vigente px-2.5 py-1 rounded-full text-xs font-bold" x-text="deuda.estado"></span>
+                          </td>
+                          <td class="px-4 py-3 text-center">
+                            <span class="text-gray-400 text-xs"><i class="fa-solid fa-file-pdf mr-1 text-red-400"></i>PDF</span>
+                          </td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+                <!-- Paginación pagadas -->
+                <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-100" x-show="totalPagesPagadas > 1">
+                  <p class="text-xs text-gray-400">
+                    Mostrando <span x-text="(pagePagadas-1)*perPage+1"></span>–<span x-text="Math.min(pagePagadas*perPage, totalPagPagadas)"></span>
+                    de <span x-text="totalPagPagadas"></span>
+                  </p>
+                  <div class="flex gap-1">
+                    <button @click="goToPagePagadas(pagePagadas-1)" :disabled="pagePagadas===1"
+                      class="w-8 h-8 rounded-lg text-xs font-bold border border-gray-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-mde-light transition-all">
+                      <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <template x-for="pg in totalPagesPagadas" :key="'pa'+pg">
+                      <button @click="goToPagePagadas(pg)"
+                        :class="pg===pagePagadas ? 'bg-green-600 text-white border-green-600' : 'text-gray-500 hover:bg-mde-light'"
+                        class="w-8 h-8 rounded-lg text-xs font-bold border border-gray-200 transition-all" x-text="pg"></button>
+                    </template>
+                    <button @click="goToPagePagadas(pagePagadas+1)" :disabled="pagePagadas===totalPagesPagadas"
+                      class="w-8 h-8 rounded-lg text-xs font-bold border border-gray-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-mde-light transition-all">
+                      <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- Botón pagar todo -->
+          <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
+            <p class="text-xs text-gray-400">
+              <i class="fa-solid fa-lock text-mde-gold mr-1"></i>
+              Pago seguro con cifrado SSL
+            </p>
+            <button @click="pagarTodo()"
+              class="btn-gold text-white font-bold px-6 py-2.5 rounded-xl text-sm flex items-center gap-2">
+              <i class="fa-solid fa-credit-card"></i>
+              <span x-text="'Pagar todo (S/ ' + (contributorData?.total || 0).toFixed(2) + ')'"></span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="max-w-7xl mx-auto px-4 pb-16 fade-up delay-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <template x-for="stat in stats">
+        <div class="stat-card p-5 text-center">
+          <div class="w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center" :class="stat.bg">
+            <i :class="stat.icon + ' text-lg'" :style="'color:' + stat.color"></i>
+          </div>
+          <p class="font-black text-2xl text-mde-navy" x-text="stat.value"></p>
+          <p class="text-xs text-gray-400 font-medium mt-1" x-text="stat.label"></p>
+        </div>
+      </template>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-mde-navy text-white mt-4">
+    <div class="max-w-7xl mx-auto px-4 py-10">
+      <div class="grid md:grid-cols-3 gap-8">
+        <div>
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-full bg-mde-gold/20 flex items-center justify-center">
+              <i class="fa-solid fa-landmark text-mde-goldlt"></i>
+            </div>
+            <div>
+              <p class="font-black text-sm">MDE<span class="text-mde-gold">Contribuyente</span></p>
+              <p class="text-xs text-blue-300">La Esperanza, La Libertad</p>
+            </div>
+          </div>
+          <p class="text-xs text-blue-300 leading-relaxed">
+            Sistema oficial de consulta y pago de tributos de la Municipalidad Distrital de La Esperanza.
+          </p>
+        </div>
+        <div>
+          <p class="text-xs font-bold text-mde-goldlt tracking-wider uppercase mb-4">Servicios</p>
+          <ul class="space-y-2 text-xs text-blue-300">
+            <li><a href="#" class="hover:text-mde-goldlt transition-colors"><i class="fa-solid fa-chevron-right text-mde-gold mr-2 text-[10px]"></i>Consulta de deudas</a></li>
+            <li><a href="#" class="hover:text-mde-goldlt transition-colors"><i class="fa-solid fa-chevron-right text-mde-gold mr-2 text-[10px]"></i>Pago en línea</a></li>
+            <li><a href="#" class="hover:text-mde-goldlt transition-colors"><i class="fa-solid fa-chevron-right text-mde-gold mr-2 text-[10px]"></i>Fraccionamiento de deudas</a></li>
+            <li><a href="#" class="hover:text-mde-goldlt transition-colors"><i class="fa-solid fa-chevron-right text-mde-gold mr-2 text-[10px]"></i>Certificado de no adeudo</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-xs font-bold text-mde-goldlt tracking-wider uppercase mb-4">Contacto</p>
+          <ul class="space-y-2 text-xs text-blue-300">
+            <li class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-mde-gold w-4"></i>Av. Sánchez Carrión Cdra. 18, La Esperanza</li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-phone text-mde-gold w-4"></i>(044) 461-000</li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-envelope text-mde-gold w-4"></i>tributacion@mde.gob.pe</li>
+          </ul>
+        </div>
+      </div>
+      <hr class="gold-line mt-8 mb-4"/>
+      <p class="text-center text-xs text-blue-400">© 2025 Municipalidad Distrital de La Esperanza — MDEContribuyente v1.0</p>
+    </div>
+  </footer>
+
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     VISTA: PANEL ADMINISTRATIVO
+═══════════════════════════════════════════════ -->
+<div x-show="view === 'admin'" x-transition class="flex min-h-screen bg-gray-50">
+
+  <!-- SIDEBAR -->
+  <aside class="w-64 bg-mde-navy min-h-screen flex-shrink-0 flex flex-col" x-show="sidebarOpen || window.innerWidth >= 768">
+    <!-- Logo -->
+    <div class="p-5 border-b border-white/10">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-full bg-mde-gold/20 flex items-center justify-center">
+          <i class="fa-solid fa-landmark text-mde-goldlt text-sm"></i>
+        </div>
+        <div>
+          <p class="font-black text-white text-sm">MDE<span class="text-mde-gold">Admin</span></p>
+          <p class="text-xs text-blue-300">Panel de control</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav items -->
+    <nav class="flex-1 py-4 px-3 overflow-y-auto">
+
+      <p class="text-[10px] font-bold text-blue-400 tracking-widest uppercase px-3 mb-2">Principal</p>
+      <template x-for="item in adminNav.main" :key="item.id">
+        <button
+          @click="adminView = item.id"
+          :class="adminView===item.id ? 'active' : ''"
+          class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-r-lg text-blue-200 text-sm font-medium text-left mb-0.5">
+          <i :class="item.icon + ' w-4 text-center'"></i>
+          <span x-text="item.label"></span>
+          <span x-show="item.badge" class="ml-auto bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5" x-text="item.badge"></span>
+        </button>
+      </template>
+
+      <p class="text-[10px] font-bold text-blue-400 tracking-widest uppercase px-3 mt-5 mb-2">Administración</p>
+      <template x-for="item in adminNav.admin" :key="item.id">
+        <button
+          @click="adminView = item.id"
+          :class="adminView===item.id ? 'active' : ''"
+          class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-r-lg text-blue-200 text-sm font-medium text-left mb-0.5">
+          <i :class="item.icon + ' w-4 text-center'"></i>
+          <span x-text="item.label"></span>
+        </button>
+      </template>
+
+      <p class="text-[10px] font-bold text-blue-400 tracking-widest uppercase px-3 mt-5 mb-2">Seguridad</p>
+      <template x-for="item in adminNav.security" :key="item.id">
+        <button
+          @click="adminView = item.id"
+          :class="adminView===item.id ? 'active' : ''"
+          class="sidebar-item w-full flex items-center gap-3 px-3 py-2.5 rounded-r-lg text-blue-200 text-sm font-medium text-left mb-0.5">
+          <i :class="item.icon + ' w-4 text-center'"></i>
+          <span x-text="item.label"></span>
+        </button>
+      </template>
+    </nav>
+
+    <!-- User info -->
+    <div class="p-4 border-t border-white/10">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-mde-gold flex items-center justify-center text-xs font-bold text-mde-navy">JR</div>
+        <div class="flex-1 min-w-0">
+          <p class="text-white text-xs font-semibold truncate">Jorge Ramírez</p>
+          <p class="text-blue-400 text-[10px]">Administrador</p>
+        </div>
+        <button @click="logout()" class="text-blue-400 hover:text-red-400 transition-colors">
+          <i class="fa-solid fa-right-from-bracket text-sm"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- Top bar admin -->
+    <div class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+      <div>
+        <h2 class="font-bold text-mde-navy text-lg" x-text="currentAdminTitle"></h2>
+        <p class="text-xs text-gray-400 font-medium">Municipalidad Distrital de La Esperanza</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button class="relative p-2 text-gray-400 hover:text-mde-navy rounded-lg hover:bg-gray-50 transition-all">
+          <i class="fa-solid fa-bell text-lg"></i>
+          <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+        </button>
+        <button @click="view='portal'" class="flex items-center gap-2 text-xs font-semibold text-mde-mid hover:text-mde-navy border border-mde-mid/30 px-3 py-2 rounded-lg transition-all">
+          <i class="fa-solid fa-arrow-left"></i>
+          Portal público
+        </button>
+      </div>
+    </div>
+
+    <!-- Dashboard content -->
+    <div class="flex-1 p-6 overflow-auto">
+
+      <!-- DASHBOARD -->
+      <div x-show="adminView === 'dashboard'">
+        <!-- Stats admin -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <template x-for="s in adminStats">
+            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+              <div class="flex items-start justify-between mb-3">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center" :style="'background:'+s.bg">
+                  <i :class="s.icon" :style="'color:'+s.color" class="text-base"></i>
+                </div>
+                <span class="text-xs font-bold px-2 py-0.5 rounded-full" :class="s.trend > 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'">
+                  <i :class="s.trend > 0 ? 'fa-solid fa-arrow-up' : 'fa-solid fa-arrow-down'" class="text-[10px]"></i>
+                  <span x-text="Math.abs(s.trend)+'%'"></span>
+                </span>
+              </div>
+              <p class="text-xl font-black text-mde-navy" x-text="s.value"></p>
+              <p class="text-xs text-gray-400 mt-1" x-text="s.label"></p>
+            </div>
+          </template>
+        </div>
+
+        <!-- Actividad reciente -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm">
+          <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h3 class="font-bold text-mde-navy text-sm">Actividad reciente</h3>
+            <button class="text-xs text-mde-mid font-semibold hover:underline">Ver todo</button>
+          </div>
+          <div class="divide-y divide-gray-50">
+            <template x-for="act in actividad">
+              <div class="px-5 py-3 flex items-center gap-3">
+                <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" :style="'background:'+act.bg">
+                  <i :class="act.icon" :style="'color:'+act.color" class="text-xs"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs font-medium text-mde-navy truncate" x-text="act.msg"></p>
+                  <p class="text-[10px] text-gray-400 mt-0.5" x-text="act.time"></p>
+                </div>
+                <span class="text-xs font-bold text-mde-navy" x-text="act.amount || ''"></span>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROLES Y PERMISOS -->
+      <div x-show="adminView === 'roles'">
+        <div class="flex justify-between items-center mb-5">
+          <p class="text-sm text-gray-500">Gestiona roles y asigna permisos por módulo</p>
+          <button @click="crearRol()" class="btn-primary text-white text-sm font-bold px-4 py-2.5 rounded-xl flex items-center gap-2">
+            <i class="fa-solid fa-plus"></i><span>Nuevo rol</span>
+          </button>
+        </div>
+        <div class="grid md:grid-cols-3 gap-4">
+          <template x-for="rol in roles">
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+              <div class="flex items-start justify-between mb-3">
+                <div>
+                  <div class="w-8 h-8 rounded-lg mb-2 flex items-center justify-center" :style="'background:'+rol.bg">
+                    <i :class="rol.icon" :style="'color:'+rol.color" class="text-sm"></i>
+                  </div>
+                  <p class="font-bold text-mde-navy text-sm" x-text="rol.nombre"></p>
+                  <p class="text-xs text-gray-400 mt-0.5" x-text="rol.usuarios + ' usuarios'"></p>
+                </div>
+                <div class="flex gap-1.5">
+                  <button @click="editarRol(rol)" class="p-1.5 hover:bg-blue-50 rounded-lg text-mde-mid transition-all">
+                    <i class="fa-solid fa-pen text-xs"></i>
+                  </button>
+                  <button @click="eliminarRol(rol)" class="p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-500 transition-all">
+                    <i class="fa-solid fa-trash text-xs"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mt-3">
+                <template x-for="p in rol.permisos">
+                  <span class="text-[10px] bg-mde-light text-mde-mid font-semibold px-2 py-0.5 rounded-full" x-text="p"></span>
+                </template>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- MÓDULOS -->
+      <div x-show="adminView === 'modulos'">
+        <div class="flex justify-between items-center mb-5">
+          <p class="text-sm text-gray-500">Activa, desactiva y crea módulos del sistema</p>
+          <button @click="crearModulo()" class="btn-primary text-white text-sm font-bold px-4 py-2.5 rounded-xl flex items-center gap-2">
+            <i class="fa-solid fa-plus"></i><span>Nuevo módulo</span>
+          </button>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-mde-light text-mde-navy">
+                <th class="px-5 py-3 text-left font-bold text-xs">Módulo</th>
+                <th class="px-5 py-3 text-left font-bold text-xs">Ruta</th>
+                <th class="px-5 py-3 text-center font-bold text-xs">Roles con acceso</th>
+                <th class="px-5 py-3 text-center font-bold text-xs">Estado</th>
+                <th class="px-5 py-3 text-center font-bold text-xs">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              <template x-for="mod in modulos">
+                <tr class="result-row">
+                  <td class="px-5 py-3">
+                    <div class="flex items-center gap-3">
+                      <div class="w-7 h-7 rounded-lg bg-mde-light flex items-center justify-center">
+                        <i :class="mod.icon + ' text-mde-mid text-xs'"></i>
+                      </div>
+                      <span class="font-semibold text-mde-navy" x-text="mod.nombre"></span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3 text-gray-400 font-mono text-xs" x-text="mod.ruta"></td>
+                  <td class="px-5 py-3 text-center">
+                    <div class="flex flex-wrap gap-1 justify-center">
+                      <template x-for="r in mod.roles">
+                        <span class="text-[10px] bg-blue-50 text-blue-700 font-semibold px-2 py-0.5 rounded-full" x-text="r"></span>
+                      </template>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3 text-center">
+                    <button @click="toggleModulo(mod)"
+                      :class="mod.activo ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'"
+                      class="px-3 py-1 rounded-full text-xs font-bold transition-all">
+                      <i :class="mod.activo ? 'fa-solid fa-toggle-on' : 'fa-solid fa-toggle-off'" class="mr-1"></i>
+                      <span x-text="mod.activo ? 'Activo' : 'Inactivo'"></span>
+                    </button>
+                  </td>
+                  <td class="px-5 py-3 text-center">
+                    <div class="flex items-center justify-center gap-2">
+                      <button class="p-1.5 hover:bg-blue-50 rounded-lg text-mde-mid transition-all">
+                        <i class="fa-solid fa-pen text-xs"></i>
+                      </button>
+                      <button @click="eliminarModulo(mod)" class="p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-500 transition-all">
+                        <i class="fa-solid fa-trash text-xs"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CONTRIBUYENTES -->
+      <div x-show="adminView === 'contribuyentes'">
+        <div class="flex justify-between items-center mb-5 flex-wrap gap-3">
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+            <input type="text" placeholder="Buscar por DNI, nombre o dirección..."
+              class="pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-mde-gold w-72 input-gold transition-all"/>
+          </div>
+          <button class="btn-primary text-white text-sm font-bold px-4 py-2.5 rounded-xl flex items-center gap-2">
+            <i class="fa-solid fa-plus"></i><span>Nuevo contribuyente</span>
+          </button>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-mde-light text-mde-navy text-xs font-bold">
+                <th class="px-5 py-3 text-left">Contribuyente</th>
+                <th class="px-5 py-3 text-center">Doc.</th>
+                <th class="px-5 py-3 text-right">Deuda total</th>
+                <th class="px-5 py-3 text-center">Estado</th>
+                <th class="px-5 py-3 text-center">Acc.</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              <template x-for="c in contribuyentes">
+                <tr class="result-row">
+                  <td class="px-5 py-3">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-full bg-mde-light flex items-center justify-center text-xs font-bold text-mde-mid" x-text="c.iniciales"></div>
+                      <div>
+                        <p class="font-semibold text-mde-navy text-xs" x-text="c.nombre"></p>
+                        <p class="text-[10px] text-gray-400" x-text="c.direccion"></p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3 text-center font-mono text-xs text-gray-600" x-text="c.doc"></td>
+                  <td class="px-5 py-3 text-right font-bold" :class="c.deuda > 0 ? 'text-red-600' : 'text-green-600'" x-text="'S/ ' + c.deuda.toFixed(2)"></td>
+                  <td class="px-5 py-3 text-center">
+                    <span :class="c.deuda > 0 ? 'badge-vencida' : 'badge-vigente'" class="px-2.5 py-1 rounded-full text-[10px] font-bold" x-text="c.deuda > 0 ? 'Con deuda' : 'Al día'"></span>
+                  </td>
+                  <td class="px-5 py-3 text-center">
+                    <button class="p-1.5 hover:bg-blue-50 rounded-lg text-mde-mid transition-all">
+                      <i class="fa-solid fa-eye text-xs"></i>
+                    </button>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /flex-1 -->
+  </div><!-- /main -->
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     SCRIPT
+═══════════════════════════════════════════════ -->
+<script>
+function appData() {
+  return {
+    view: 'portal',
+    adminView: 'dashboard',
+    searchType: 'dni',
+    searchDoc: '',
+    showResult: false,
+    sidebarOpen: false,
+    contributorData: null,
+    deudaTab: 'pendientes',
+
+    deudasPendientes: [],
+    deudasPagadas: [],
+
+    pagePendientes: 1,
+    pagePagadas: 1,
+    perPage: 8,
+
+    stats: [
+      { value:'0', label:'Contribuyentes',  icon:'fa-solid fa-users',         bg:'#EEF4FB', color:'#19376D' },
+      { value:'S/ 0', label:'Recaudado',    icon:'fa-solid fa-sack-dollar',   bg:'#FEF3C7', color:'#92400E' },
+      { value:'0',    label:'Deudas total',  icon:'fa-solid fa-file-invoice-dollar', bg:'#DCFCE7', color:'#166534' },
+      { value:'0',    label:'Deudas vencidas', icon:'fa-solid fa-triangle-exclamation', bg:'#FEE2E2', color:'#B91C1C' },
+    ],
+
+    adminNav: {
+      main: [
+        { id:'dashboard',      label:'Dashboard',       icon:'fa-solid fa-chart-pie',      badge:null },
+        { id:'contribuyentes', label:'Contribuyentes',  icon:'fa-solid fa-users',           badge:null },
+        { id:'deudas',         label:'Deudas',          icon:'fa-solid fa-file-invoice-dollar', badge:'12' },
+        { id:'pagos',          label:'Pagos',           icon:'fa-solid fa-credit-card',     badge:null },
+      ],
+      admin: [
+        { id:'roles',    label:'Roles y permisos', icon:'fa-solid fa-user-shield' },
+        { id:'modulos',  label:'Módulos del sistema', icon:'fa-solid fa-puzzle-piece' },
+        { id:'usuarios', label:'Usuarios admin',   icon:'fa-solid fa-user-gear' },
+        { id:'reportes', label:'Reportes',         icon:'fa-solid fa-chart-bar' },
+      ],
+      security: [
+        { id:'auditoria', label:'Auditoría',      icon:'fa-solid fa-scroll' },
+        { id:'accesos',   label:'Log de accesos', icon:'fa-solid fa-key' },
+      ],
+    },
+
+    adminStats: [
+      { value:'S/ 48,200', label:'Recaudado hoy',      icon:'fa-solid fa-sack-dollar',  bg:'#FEF3C7', color:'#92400E', trend:+12 },
+      { value:'156',       label:'Pagos procesados',   icon:'fa-solid fa-credit-card',  bg:'#DCFCE7', color:'#166534', trend:+8  },
+      { value:'84',        label:'Nuevas consultas',   icon:'fa-solid fa-magnifying-glass', bg:'#EEF4FB', color:'#19376D', trend:+3 },
+      { value:'23',        label:'Deudas vencidas hoy',icon:'fa-solid fa-triangle-exclamation', bg:'#FEE2E2', color:'#B91C1C', trend:-5 },
+    ],
+
+    actividad: [
+      { icon:'fa-solid fa-credit-card', bg:'#DCFCE7', color:'#166534', msg:'Pago realizado – Juan R. Flores', time:'Hace 5 min', amount:'S/ 450.00' },
+      { icon:'fa-solid fa-user-plus',   bg:'#EEF4FB', color:'#19376D', msg:'Nuevo contribuyente registrado – María G.', time:'Hace 12 min', amount:'' },
+      { icon:'fa-solid fa-file-invoice',bg:'#FEF3C7', color:'#92400E', msg:'Deuda actualizada – Predio 3042', time:'Hace 25 min', amount:'S/ 1,200.00' },
+      { icon:'fa-solid fa-shield-halved',bg:'#FEE2E2',color:'#B91C1C', msg:'Acceso admin – Carlos M.', time:'Hace 1 hora', amount:'' },
+      { icon:'fa-solid fa-credit-card', bg:'#DCFCE7', color:'#166534', msg:'Pago en línea – Empresa RANSA S.A.C.', time:'Hace 2 horas', amount:'S/ 3,100.00' },
+    ],
+
+    roles: [
+      { nombre:'Super Admin',      usuarios:2, permisos:['Todo el sistema'],        icon:'fa-solid fa-crown',       bg:'#FEF3C7', color:'#92400E' },
+      { nombre:'Cajero',           usuarios:8, permisos:['Pagos','Ver deudas'],      icon:'fa-solid fa-cash-register',bg:'#DCFCE7', color:'#166534' },
+      { nombre:'Fiscalizador',     usuarios:5, permisos:['Contribuyentes','Predios','Reportes'], icon:'fa-solid fa-clipboard-check', bg:'#EEF4FB', color:'#19376D' },
+      { nombre:'Auditor',          usuarios:2, permisos:['Reportes','Auditoría'],    icon:'fa-solid fa-scroll',      bg:'#F3E8FF', color:'#7C3AED' },
+      { nombre:'Consulta',         usuarios:15,permisos:['Solo lectura'],             icon:'fa-solid fa-eye',         bg:'#F1F5F9', color:'#64748B' },
+    ],
+
+    modulos: [
+      { nombre:'Contribuyentes', ruta:'/admin/contribuyentes', roles:['Super Admin','Fiscalizador'], activo:true,  icon:'fa-solid fa-users' },
+      { nombre:'Deudas',         ruta:'/admin/deudas',         roles:['Super Admin','Cajero','Fiscalizador'], activo:true, icon:'fa-solid fa-file-invoice-dollar' },
+      { nombre:'Pagos',          ruta:'/admin/pagos',          roles:['Super Admin','Cajero'], activo:true,  icon:'fa-solid fa-credit-card' },
+      { nombre:'Roles',          ruta:'/admin/roles',          roles:['Super Admin'],          activo:true,  icon:'fa-solid fa-user-shield' },
+      { nombre:'Reportes',       ruta:'/admin/reportes',       roles:['Super Admin','Auditor','Fiscalizador'], activo:true, icon:'fa-solid fa-chart-bar' },
+      { nombre:'Fraccionamiento',ruta:'/admin/fraccion',       roles:['Super Admin','Cajero'], activo:false, icon:'fa-solid fa-file-contract' },
+    ],
+
+    contribuyentes: [],
+
+    async cargarContribuyentes() {
+      try {
+        const res = await fetch('/api/contribuyentes');
+        const data = await res.json();
+        this.contribuyentes = data;
+      } catch (e) { /* silently fail */ }
+    },
+
+    async cargarStats() {
+      try {
+        const res = await fetch('/api/stats');
+        const data = await res.json();
+        this.stats = [
+          { value: data.contribuyentes.toLocaleString(), label:'Contribuyentes',    icon:'fa-solid fa-users',         bg:'#EEF4FB', color:'#19376D' },
+          { value: 'S/ ' + (data.recaudado/1000).toFixed(1)+'K', label:'Recaudado', icon:'fa-solid fa-sack-dollar',   bg:'#FEF3C7', color:'#92400E' },
+          { value: data.deudas_total.toLocaleString(),   label:'Deudas total',      icon:'fa-solid fa-file-invoice-dollar', bg:'#DCFCE7', color:'#166534' },
+          { value: data.deudas_vencidas.toLocaleString(), label:'Deudas vencidas',  icon:'fa-solid fa-triangle-exclamation', bg:'#FEE2E2', color:'#B91C1C' },
+        ];
+      } catch (e) { /* silently fail */ }
+    },
+
+    get currentAdminTitle() {
+      const all = [...this.adminNav.main, ...this.adminNav.admin, ...this.adminNav.security];
+      const found = all.find(i => i.id === this.adminView);
+      return found ? found.label : 'Panel';
+    },
+
+    init() {
+      this.cargarStats();
+      this.cargarContribuyentes();
+    },
+
+    get totalPagPendientes() { return this.deudasPendientes.length; },
+    get totalPagesPendientes() { return Math.max(1, Math.ceil(this.totalPagPendientes / this.perPage)); },
+    get paginatedPendientes() {
+      const start = (this.pagePendientes - 1) * this.perPage;
+      return this.deudasPendientes.slice(start, start + this.perPage);
+    },
+
+    get totalPagPagadas() { return this.deudasPagadas.length; },
+    get totalPagesPagadas() { return Math.max(1, Math.ceil(this.totalPagPagadas / this.perPage)); },
+    get paginatedPagadas() {
+      const start = (this.pagePagadas - 1) * this.perPage;
+      return this.deudasPagadas.slice(start, start + this.perPage);
+    },
+
+    goToPagePendientes(p) { if (p >= 1 && p <= this.totalPagesPendientes) this.pagePendientes = p; },
+    goToPagePagadas(p)    { if (p >= 1 && p <= this.totalPagesPagadas)    this.pagePagadas = p; },
+
+    async buscarContribuyente() {
+      if (!this.searchDoc || this.searchDoc.length < 8) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Número incompleto',
+          text: `Ingresa un ${this.searchType.toUpperCase()} válido de ${this.searchType === 'dni' ? '8' : '11'} dígitos.`,
+          confirmButtonColor: '#19376D',
+          confirmButtonText: 'Entendido'
+        });
+        return;
+      }
+      Swal.fire({
+        title: 'Consultando...',
+        html: `<p class="text-sm text-gray-500">Buscando información del contribuyente</p>`,
+        timerProgressBar: true,
+        didOpen: () => Swal.showLoading(),
+        showConfirmButton: false,
+      });
+      try {
+        const res = await fetch(`/api/contribuyentes/buscar?doc=${this.searchDoc}`);
+        const data = await res.json();
+        Swal.close();
+        if (!res.ok) {
+          Swal.fire({ icon:'info', title:'Sin resultados', text: data.error || 'Contribuyente no encontrado', confirmButtonColor:'#19376D' });
+          this.showResult = false;
+          return;
+        }
+        this.contributorData = data;
+        this.deudasPendientes = (data.pendientes || []).map(d => ({ ...d, icon: 'fa-solid fa-file-invoice' }));
+        this.deudasPagadas    = (data.pagadas || []).map(d => ({ ...d, icon: 'fa-solid fa-check-circle' }));
+        this.pagePendientes = 1;
+        this.pagePagadas = 1;
+        this.deudaTab = 'pendientes';
+        this.showResult = true;
+      } catch (e) {
+        Swal.close();
+        Swal.fire({ icon:'error', title:'Error de conexión', text:'No se pudo conectar con el servidor.', confirmButtonColor:'#19376D' });
+      }
+    },
+
+    pagarDeuda(deuda) {
+      Swal.fire({
+        title: `Pagar deuda`,
+        html: `
+          <div style="text-align:left;padding:8px 0">
+            <p style="font-size:13px;color:#6b7280;margin-bottom:4px">Concepto</p>
+            <p style="font-weight:700;color:#0B2447;font-size:15px">${deuda.concepto} – ${deuda.periodo}</p>
+            <p style="font-size:13px;color:#6b7280;margin-top:12px;margin-bottom:4px">Monto a pagar</p>
+            <p style="font-weight:900;color:#0B2447;font-size:24px">${deuda.monto}</p>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonColor: '#C9A84C',
+        cancelButtonColor: '#9CA3AF',
+        confirmButtonText: '<i class="fa-solid fa-credit-card" style="margin-right:6px"></i>Proceder al pago',
+        cancelButtonText: 'Cancelar',
+      }).then(r => {
+        if (r.isConfirmed) this.procesarPago(deuda.monto);
+      });
+    },
+
+    pagarTodo() {
+      const total = this.contributorData?.total || 0;
+      Swal.fire({
+        title: 'Pagar deuda total',
+        html: `
+          <div style="text-align:center;padding:8px 0">
+            <p style="font-size:13px;color:#6b7280">Pagarás el total de tu deuda:</p>
+            <p style="font-weight:900;color:#B91C1C;font-size:32px;margin:8px 0">S/ ${total.toFixed(2)}</p>
+            <p style="font-size:12px;color:#9CA3AF">Incluye ${this.deudasPendientes.length} conceptos pendientes</p>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonColor: '#C9A84C',
+        cancelButtonColor: '#9CA3AF',
+        confirmButtonText: '<i class="fa-solid fa-credit-card" style="margin-right:6px"></i>Pagar todo',
+        cancelButtonText: 'Cancelar',
+      }).then(r => {
+        if (r.isConfirmed) this.procesarPago('S/ ' + total.toFixed(2));
+      });
+    },
+
+    procesarPago(monto) {
+      Swal.fire({
+        title: 'Procesando pago...',
+        html: '<p style="font-size:13px;color:#6b7280">Conectando con pasarela de pago segura</p>',
+        timer: 2000, timerProgressBar: true,
+        didOpen: () => Swal.showLoading(),
+        showConfirmButton: false,
+      }).then(() => {
+        Swal.fire({
+          icon: 'success',
+          title: '¡Pago exitoso!',
+          html: `
+            <div style="text-align:center">
+              <p style="font-size:13px;color:#6b7280">Se procesó el pago de</p>
+              <p style="font-weight:900;color:#166534;font-size:28px">${monto}</p>
+              <p style="font-size:12px;color:#9CA3AF;margin-top:8px">Recibirás un comprobante en tu correo</p>
+            </div>
+          `,
+          confirmButtonColor: '#19376D',
+          confirmButtonText: 'Descargar comprobante',
+        });
+      });
+    },
+
+    showAdminLogin() {
+      Swal.fire({
+        title: '<span style="color:#0B2447;font-family:Montserrat,sans-serif;font-weight:800">Acceso Administrativo</span>',
+        html: `
+          <p style="font-size:12px;color:#9CA3AF;margin-bottom:20px">Municipalidad Distrital de La Esperanza</p>
+          <div style="text-align:left;margin-bottom:12px">
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px">Usuario</label>
+            <input id="swal-user" type="text" placeholder="usuario@mde.gob.pe" 
+              style="width:100%;padding:10px 14px;border:2px solid #E5E7EB;border-radius:10px;font-size:13px;outline:none;box-sizing:border-box;font-family:Montserrat,sans-serif"/>
+          </div>
+          <div style="text-align:left">
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px">Contraseña</label>
+            <input id="swal-pass" type="password" placeholder="••••••••"
+              style="width:100%;padding:10px 14px;border:2px solid #E5E7EB;border-radius:10px;font-size:13px;outline:none;box-sizing:border-box;font-family:Montserrat,sans-serif"/>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonColor: '#0B2447',
+        confirmButtonText: '<i class="fa-solid fa-right-to-bracket" style="margin-right:6px"></i>Ingresar',
+        cancelButtonText: 'Cancelar',
+        focusConfirm: false,
+      }).then(r => {
+        if (r.isConfirmed) {
+          this.view = 'admin';
+          this.adminView = 'dashboard';
+        }
+      });
+    },
+
+    crearRol() {
+      Swal.fire({
+        title: 'Nuevo rol',
+        input: 'text',
+        inputLabel: 'Nombre del rol',
+        inputPlaceholder: 'Ej: Supervisor de Cobranza',
+        confirmButtonColor: '#0B2447',
+        confirmButtonText: 'Crear rol',
+        showCancelButton: true,
+      }).then(r => {
+        if (r.isConfirmed && r.value) {
+          this.roles.push({
+            nombre: r.value, usuarios: 0,
+            permisos: ['Sin permisos'],
+            icon: 'fa-solid fa-user', bg:'#F1F5F9', color:'#64748B'
+          });
+          Swal.fire({ icon:'success', title:'Rol creado', text:`El rol "${r.value}" fue creado correctamente.`, confirmButtonColor:'#0B2447', timer:2000, showConfirmButton:false });
+        }
+      });
+    },
+
+    editarRol(rol) {
+      Swal.fire({
+        title: `Editar: ${rol.nombre}`,
+        text: 'Esta función abrirá el editor completo de permisos.',
+        icon: 'info',
+        confirmButtonColor: '#0B2447',
+        confirmButtonText: 'Ir al editor',
+      });
+    },
+
+    eliminarRol(rol) {
+      Swal.fire({
+        title: '¿Eliminar rol?',
+        html: `<p style="font-size:14px">El rol <strong>${rol.nombre}</strong> será eliminado permanentemente y los ${rol.usuarios} usuarios asignados perderán sus permisos.</p>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#B91C1C',
+        cancelButtonColor: '#9CA3AF',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+      }).then(r => {
+        if (r.isConfirmed) {
+          this.roles = this.roles.filter(x => x !== rol);
+          Swal.fire({ icon:'success', title:'Eliminado', timer:1500, showConfirmButton:false });
+        }
+      });
+    },
+
+    crearModulo() {
+      Swal.fire({
+        title: 'Nuevo módulo',
+        html: `
+          <div style="text-align:left">
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px">Nombre</label>
+            <input id="mod-nombre" type="text" placeholder="Ej: Fiscalización" 
+              style="width:100%;padding:8px 12px;border:2px solid #E5E7EB;border-radius:8px;font-size:13px;margin-bottom:12px;box-sizing:border-box;outline:none"/>
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px">Ruta URL</label>
+            <input id="mod-ruta" type="text" placeholder="/admin/fiscalizacion"
+              style="width:100%;padding:8px 12px;border:2px solid #E5E7EB;border-radius:8px;font-size:13px;box-sizing:border-box;outline:none"/>
+          </div>
+        `,
+        confirmButtonColor: '#0B2447',
+        confirmButtonText: 'Crear módulo',
+        showCancelButton: true,
+      }).then(r => {
+        if (r.isConfirmed) {
+          const nombre = document.getElementById('mod-nombre')?.value || 'Módulo nuevo';
+          const ruta   = document.getElementById('mod-ruta')?.value || '/admin/nuevo';
+          this.modulos.push({ nombre, ruta, roles:['Super Admin'], activo:true, icon:'fa-solid fa-puzzle-piece' });
+          Swal.fire({ icon:'success', title:'Módulo creado', timer:1500, showConfirmButton:false });
+        }
+      });
+    },
+
+    toggleModulo(mod) {
+      const accion = mod.activo ? 'desactivar' : 'activar';
+      Swal.fire({
+        title: `¿${accion.charAt(0).toUpperCase()+accion.slice(1)} módulo?`,
+        text: `El módulo "${mod.nombre}" será ${accion}do.`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: mod.activo ? '#B91C1C' : '#166534',
+        confirmButtonText: `Sí, ${accion}`,
+      }).then(r => {
+        if (r.isConfirmed) {
+          mod.activo = !mod.activo;
+          Swal.fire({ icon:'success', title:`Módulo ${mod.activo ? 'activado' : 'desactivado'}`, timer:1200, showConfirmButton:false });
+        }
+      });
+    },
+
+    eliminarModulo(mod) {
+      Swal.fire({
+        title: '¿Eliminar módulo?',
+        html: `<p style="font-size:14px">El módulo <strong>${mod.nombre}</strong> y todos sus permisos asociados serán eliminados.</p>`,
+        icon: 'warning', showCancelButton: true,
+        confirmButtonColor: '#B91C1C', confirmButtonText: 'Eliminar',
+      }).then(r => {
+        if (r.isConfirmed) {
+          this.modulos = this.modulos.filter(x => x !== mod);
+          Swal.fire({ icon:'success', title:'Módulo eliminado', timer:1200, showConfirmButton:false });
+        }
+      });
+    },
+
+    logout() {
+      Swal.fire({
+        title: '¿Cerrar sesión?',
+        text: 'Se cerrará tu sesión de administrador.',
+        icon: 'question', showCancelButton: true,
+        confirmButtonColor: '#0B2447',
+        confirmButtonText: 'Cerrar sesión',
+      }).then(r => {
+        if (r.isConfirmed) { this.view = 'portal'; }
+      });
+    },
+  }
+}
+</script>
+</body>
+</html>
