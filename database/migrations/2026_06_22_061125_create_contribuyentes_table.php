@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('contribuyentes', function (Blueprint $table) {
             $table->id();
-            $table->string("nombres_razon_social");
-            $table->string("dni_ruc");
-            $table->string("direccion_fiscal");
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->string("nombres_razon_social")->unique();
+            $table->string("dni_ruc")->unique();
+            $table->string("direccion_fiscal")->unique();
             $table->timestamps();
         });
     }
