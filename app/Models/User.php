@@ -47,6 +47,11 @@ class User extends Authenticatable
         ];
     }
 
+    protected $with = [
+        'contribuyente'
+    ];
+    
+
     public function contribuyente()
     {
         return $this->hasOne(Contribuyente::class);

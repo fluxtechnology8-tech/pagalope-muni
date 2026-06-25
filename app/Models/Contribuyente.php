@@ -7,7 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Contribuyente extends Model
 {
     protected $fillable = [
-        'nombres_razon_social', 'dni_ruc', 'direccion_fiscal'
+        'user_id', 'nombres_razon_social', 'dni_ruc', 'direccion_fiscal'
+    ];
+
+    protected $hidden = [
+        'created_at', 'updated_at'
     ];
 
     // Declara la relación con Deuda

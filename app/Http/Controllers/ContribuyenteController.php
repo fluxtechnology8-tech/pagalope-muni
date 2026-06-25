@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreContribuyenteRequest;
 use App\Http\Requests\UpdateContribuyenteRequest;
 use App\Models\Contribuyente;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ContribuyenteController extends Controller
 {
@@ -20,13 +20,26 @@ class ContribuyenteController extends Controller
         return view('', compact('contribuyentes'));
     }
 
+    public function me()
+    {
+        $me = Auth::user()->contribuyente;
+
+        if ($me == null) {
+            return redirect()
+                    ->route('contribuyentes.create');
+        } 
+
+        // Agregar la vista
+        return view('contribuyentes.me', compact('me'));
+    }
+
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
         // Agregar la vista
-        return view('');
+        return view('contribuyentes.create');
     }
 
     /**
@@ -34,10 +47,18 @@ class ContribuyenteController extends Controller
      */
     public function store(StoreContribuyenteRequest $request)
     {
-        Contribuyente::create($request->validated());
+        $data = $request->validated();
+        $contribuyenteInfo = [
+            'user_id' => Auth::user()->id,
+            'nombres_razon_social' => $data['nombres_razon_social'],
+            'dni_ruc' => $data['dni_ruc'],
+            'direccion_fiscal' => $data['direccion_fiscal']
+        ];
+    
+        Contribuyente::create($contribuyenteInfo);
 
         return redirect()
-                ->route('') // Agregar la vista
+                ->route('contribuyentes.me') // Agregar la vista
                 ->with('success', 'Contribuyente creado exitosamente');
     }
 
@@ -77,15 +98,6 @@ class ContribuyenteController extends Controller
                 ->with('success', 'Contribuyente actualizado exitosamente');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        // VERIFICAR SI SE DEBE DE PODER ELIMINAR UN CONTRIBUYENTE A NIVEL DE BD
-        // CONTRIBUYENTE TIENE FK DE USER
-        $contribuyente = Contribuyente::findOrFail($id);
-        
-        $contribuyente->delete();
-    }
+    // NO HAY MÉTODO PARA ELIMINAR UN CONTRIBUYENTE, PUES TIENE UNA FK DE USUARIO
+    // ENTONCES SE BORRARÁ EL CONTRIBUYENTE CUANDO SE ELIMINE EL USUARIO
 }

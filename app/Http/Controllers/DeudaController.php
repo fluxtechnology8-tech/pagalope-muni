@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Deuda;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DeudaController extends Controller
 {
@@ -11,7 +13,11 @@ class DeudaController extends Controller
      */
     public function index()
     {
-        //
+        $contribuyenteId = Auth::user()->contribuyente->id;
+        $deudas = Deuda::where('contribuyente_id', $contribuyenteId)
+                        ->get();
+
+        return view('deudas.index', compact('deudas'));
     }
 
     /**
