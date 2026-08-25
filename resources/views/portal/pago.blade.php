@@ -9,7 +9,7 @@
       <i class="fa-solid fa-shield-halved text-mde-gold"></i>
       Pasarela de pago segura
     </div>
-    <h2 class="font-heading font-black text-4xl text-mde-navy mb-4 leading-tight">
+    <h2 class="font-heading font-black text-3xl md:text-4xl text-mde-navy mb-4 leading-tight">
       Pago en línea<br/>
       <span class="text-mde-mid">de tus tributos</span>
     </h2>

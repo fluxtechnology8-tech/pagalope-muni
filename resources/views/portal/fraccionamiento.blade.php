@@ -9,7 +9,7 @@
       <i class="fa-solid fa-file-invoice text-mde-gold"></i>
       Fraccionamiento de deudas
     </div>
-    <h2 class="font-heading font-black text-4xl text-mde-navy mb-4 leading-tight">
+    <h2 class="font-heading font-black text-3xl md:text-4xl text-mde-navy mb-4 leading-tight">
       Fracciona tu deuda<br/>
       <span class="text-mde-mid">en cuotas accesibles</span>
     </h2>

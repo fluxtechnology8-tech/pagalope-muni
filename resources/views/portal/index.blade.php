@@ -11,7 +11,7 @@
       <i class="fa-solid fa-circle-check text-mde-gold pulse-gold"></i>
       Servicio disponible 24 horas
     </div>
-    <h2 class="font-heading font-black text-4xl text-mde-navy mb-4 leading-tight">
+    <h2 class="font-heading font-black text-3xl md:text-4xl text-mde-navy mb-4 leading-tight">
       Consulta tu deuda tributaria<br/>
       <span class="text-mde-mid">desde cualquier lugar</span>
     </h2>
@@ -20,39 +20,45 @@
     </p>
 
     {{-- Tarjeta de búsqueda --}}
-    <div class="search-card p-8 fade-up delay-3">
+    <div class="search-card p-5 sm:p-8 fade-up delay-3">
       {{-- Tabs tipo --}}
       <div class="flex bg-mde-light rounded-xl p-1 mb-6 gap-1">
-        <button @click="searchType='dni'"
+        <button @click="setSearchType('dni')"
           :class="searchType==='dni' ? 'bg-mde-navy text-white shadow' : 'text-gray-500 hover:text-mde-navy'"
-          class="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all">
-          <i class="fa-solid fa-id-card mr-2"></i>Persona Natural (DNI)
+          class="flex-1 py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all">
+          <i class="fa-solid fa-id-card mr-1.5 sm:mr-2"></i><span class="hidden xs:inline">Persona Natural </span>(DNI)
         </button>
-        <button @click="searchType='ruc'"
+        <button @click="setSearchType('ruc')"
           :class="searchType==='ruc' ? 'bg-mde-navy text-white shadow' : 'text-gray-500 hover:text-mde-navy'"
-          class="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all">
-          <i class="fa-solid fa-building mr-2"></i>Persona Jurídica (RUC)
+          class="flex-1 py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all">
+          <i class="fa-solid fa-building mr-1.5 sm:mr-2"></i><span class="hidden xs:inline">Persona Jurídica </span>(RUC)
         </button>
       </div>
 
       {{-- Input búsqueda --}}
-      <div class="flex gap-3">
+      <div class="flex flex-col sm:flex-row gap-3">
         <div class="flex-1 relative">
           <div class="absolute left-4 top-1/2 -translate-y-1/2 text-mde-mid pointer-events-none">
             <i x-show="searchType==='dni'" class="fa-solid fa-id-card text-lg"></i>
             <i x-show="searchType==='ruc'" class="fa-solid fa-building text-lg"></i>
           </div>
           <input
-            x-model="searchDoc"
+            :value="searchDoc"
+            @input="onDocInput($event)"
             type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            autocomplete="off"
             :placeholder="searchType==='dni' ? 'Ingresa tu DNI (8 dígitos)' : 'Ingresa tu RUC (11 dígitos)'"
             :maxlength="searchType==='dni' ? 8 : 11"
-            class="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-mde-navy font-semibold text-lg input-gold transition-all"
+            :class="docError ? 'border-red-500' : 'border-gray-200'"
+            class="w-full pl-12 pr-4 py-4 border-2 rounded-xl text-mde-navy font-semibold text-lg input-gold transition-all"
             @keyup.enter="buscar()"
           />
+          <p x-show="docError" x-transition x-text="docError" class="text-red-600 text-xs font-bold mt-1.5 text-left"></p>
         </div>
         <button @click="buscar()"
-          class="btn-primary text-white px-8 py-4 rounded-xl font-bold text-sm flex items-center gap-2">
+          class="btn-primary text-white px-8 py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 w-full sm:w-auto">
           <i class="fa-solid fa-magnifying-glass"></i>
           <span>Consultar</span>
         </button>
@@ -283,6 +289,7 @@ function portalBuscador() {
   return {
     searchType: 'dni',
     searchDoc: '',
+    docError: '',
     showResult: false,
     contributor: null,
     deudaTab: 'pendientes',
@@ -304,6 +311,27 @@ function portalBuscador() {
     },
 
     init() {},
+
+    setSearchType(type) {
+      this.searchType = type;
+      const max = type === 'dni' ? 8 : 11;
+      if (this.searchDoc.length > max) this.searchDoc = this.searchDoc.slice(0, max);
+      this.docError = '';
+    },
+
+    onDocInput(e) {
+      const raw = e.target.value;
+      const max = this.searchType === 'dni' ? 8 : 11;
+      const digitsOnly = raw.replace(/[^0-9]/g, '').slice(0, max);
+      const hadInvalidChars = /[^0-9]/.test(raw);
+
+      this.searchDoc = digitsOnly;
+      e.target.value = digitsOnly;
+
+      this.docError = hadInvalidChars
+        ? `Solo se permiten números. El ${this.searchType.toUpperCase()} debe tener ${max} dígitos.`
+        : '';
+    },
 
     async buscar() {
       if (!this.searchDoc || this.searchDoc.length < 8) {
