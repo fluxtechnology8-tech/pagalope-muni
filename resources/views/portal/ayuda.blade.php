@@ -20,7 +20,7 @@
   </div>
 
   {{-- ═══════════ VISTA: 4 CATEGORÍAS ═══════════ --}}
-  <div x-show="view === 'home'" x-transition class="max-w-4xl mx-auto fade-up delay-3">
+  <div x-show="view === 'home'" class="max-w-4xl mx-auto fade-up delay-3">
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
       <button @click="goTo('consulta')"
               class="group rounded-2xl bg-white border-2 border-gray-100 hover:border-mde-gold shadow-sm hover:shadow-xl transition-all p-8 flex flex-col items-center justify-center gap-4 text-center min-h-[200px] sm:min-h-[240px]">
@@ -78,7 +78,7 @@
     </button>
 
     {{-- Consulta de deuda --}}
-    <div x-show="view === 'consulta'" x-cloak x-transition>
+    <div x-show="view === 'consulta'" x-cloak>
       <h3 class="flex items-center gap-2 text-mde-navy font-heading font-bold text-lg mb-3">
         <span class="w-8 h-8 rounded-lg bg-mde-light flex items-center justify-center shrink-0">
           <i class="fa-solid fa-magnifying-glass text-mde-mid text-sm"></i>
@@ -107,7 +107,7 @@
     </div>
 
     {{-- Pago en línea --}}
-    <div x-show="view === 'pago'" x-cloak x-transition>
+    <div x-show="view === 'pago'" x-cloak>
       <h3 class="flex items-center gap-2 text-mde-navy font-heading font-bold text-lg mb-3">
         <span class="w-8 h-8 rounded-lg bg-mde-light flex items-center justify-center shrink-0">
           <i class="fa-solid fa-credit-card text-mde-mid text-sm"></i>
@@ -136,7 +136,7 @@
     </div>
 
     {{-- Fraccionamiento --}}
-    <div x-show="view === 'fraccionamiento'" x-cloak x-transition>
+    <div x-show="view === 'fraccionamiento'" x-cloak>
       <h3 class="flex items-center gap-2 text-mde-navy font-heading font-bold text-lg mb-3">
         <span class="w-8 h-8 rounded-lg bg-mde-light flex items-center justify-center shrink-0">
           <i class="fa-solid fa-file-invoice text-mde-mid text-sm"></i>
@@ -164,7 +164,7 @@
     </div>
 
     {{-- Soporte y accesibilidad --}}
-    <div x-show="view === 'soporte'" x-cloak x-transition>
+    <div x-show="view === 'soporte'" x-cloak>
       <h3 class="flex items-center gap-2 text-mde-navy font-heading font-bold text-lg mb-3">
         <span class="w-8 h-8 rounded-lg bg-mde-light flex items-center justify-center shrink-0">
           <i class="fa-solid fa-headset text-mde-mid text-sm"></i>
@@ -222,8 +222,8 @@
       view: 'home',
       open: null,
       goTo(view) {
-        this.view = view;
         this.open = null;
+        this.$nextTick(() => { this.view = view; });
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
       toggle(id) {
