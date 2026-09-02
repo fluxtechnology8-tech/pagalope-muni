@@ -13,6 +13,9 @@ use App\Http\Controllers\Admin\UsuarioController;
 use App\Http\Controllers\Admin\ReporteController;
 use App\Http\Controllers\Admin\AuditoriaController;
 use App\Http\Controllers\Admin\AccesoController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Contribuyentes\ContribuyenteDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,27 +41,51 @@ Route::get('/ayuda', [HomeController::class, 'ayuda'])->name('portal.ayuda');
 
 /*
 |--------------------------------------------------------------------------
+| Autenticación Contribuyente
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('/contribuyentes')->name('contribuyentes.')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginContribuyente'])->name('login');
+    Route::post('/login', [AuthController::class, 'loginContribuyente'])->name('login.post');
+});
+
+/*
+|--------------------------------------------------------------------------
 | Autenticación Administrativa
 |--------------------------------------------------------------------------
 */
 
-Route::get('/admin/login', [AdminController::class, 'showLogin'])->name('admin.login');
-Route::post('/admin/login', [AdminController::class, 'login'])->name('admin.login.post');
-Route::post('/admin/logout', [AdminController::class, 'logout'])->name('admin.logout');
+Route::prefix('/admin')->name('admin.')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginAdministrador'])->name('login');
+    Route::post('/login', [AuthController::class, 'loginAdministrador'])->name('login.post');
+});
+
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('admin.logout');
+
+/*
+|--------------------------------------------------------------------------
+| Panel Contribuyente (requiere autenticación)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'contribuyente'])->prefix('/contribuyentes')->name('contribuyentes.')->group(function () {
+    Route::get('/dashboard', [ContribuyenteDashboardController::class, 'index'])->name('dashboard');
+});
 
 /*
 |--------------------------------------------------------------------------
 | Panel Administrativo (requiere autenticación)
 |--------------------------------------------------------------------------
 */
+Route::middleware(['auth', 'administrador'])->prefix('/admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+});
 
+// TODO LO DE ABAJO PARA QUÉ SIRVE??
 Route::prefix('admin')->name('admin.')->group(function () {
 
     // TODO: Agregar middleware de autenticación y verificación de rol admin
     // ->middleware(['auth', 'admin'])
-
-    // Dashboard
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // Contribuyentes
     Route::resource('contribuyentes', ContribuyenteController::class);
